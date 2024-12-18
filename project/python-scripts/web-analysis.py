@@ -1,8 +1,11 @@
+# prompt: optimize the above code for unique word cound
+
 import requests
 from bs4 import BeautifulSoup
 import csv
 import re
 from datetime import datetime
+from collections import Counter
 
 def fetch_page_data(url):
     try:
@@ -22,27 +25,39 @@ def extract_meta_tags(soup):
     return meta_tags
 
 def extract_performance_metrics(url):
-    # Placeholder for performance metrics
-    # Use libraries like `lighthouse` or `Google PageSpeed API` for actual metrics
     return {
         "response_time_ms": requests.get(url).elapsed.total_seconds() * 1000
     }
 
 def extract_content_analysis(soup):
+    text = soup.get_text()
+    words = re.findall(r'\b\w+\b', text.lower()) # Find all words, convert to lowercase
+    word_counts = Counter(words)
+    
     content_analysis = {
-        "word_count": len(re.findall(r'\w+', soup.get_text())),
+        "word_count": len(words),
+        "unique_word_count": len(word_counts), # Count unique words
         "image_count": len(soup.find_all('img')),
         "link_count": len(soup.find_all('a'))
     }
-    return content_analysis
+    return content_analysis, word_counts # Return word counts
 
-def save_to_csv(data, filename):
+
+def save_to_csv(data, filename, word_counts=None):
     keys = data[0].keys()
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=keys)
         writer.writeheader()
         writer.writerows(data)
     print(f"Data saved to {filename}")
+    
+    if word_counts:
+        with open("word_counts.csv", "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["word", "count"])
+            writer.writerows(word_counts.items())
+        print("Word counts saved to word_counts.csv")
+
 
 def main():
     url = input("Enter the URL to analyze: ")
@@ -53,9 +68,8 @@ def main():
         
         meta_tags = extract_meta_tags(soup)
         performance_metrics = extract_performance_metrics(url)
-        content_analysis = extract_content_analysis(soup)
+        content_analysis, word_counts = extract_content_analysis(soup)
         
-        # Combine all data
         data = {
             "url": url,
             "meta_tags": meta_tags,
@@ -64,11 +78,10 @@ def main():
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
-        # Flatten meta tags for CSV
         flat_meta_tags = {f"meta_{k}": v for k, v in meta_tags.items()}
         flat_data = {**data, **flat_meta_tags}
         
-        save_to_csv([flat_data], "webpage_analysis.csv")
+        save_to_csv([flat_data], "webpage_analysis.csv", word_counts)
 
 if __name__ == "__main__":
     main()
