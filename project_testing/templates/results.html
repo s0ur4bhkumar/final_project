@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SEO Analysis Results</title>
+</head>
+<body>
+    <h1>SEO Analysis Results for {{ url }}</h1>
+    
+    <h2>Meta Tags</h2>
+    <ul>
+        {% for key, value in meta_tags.items() %}
+            <li><strong>{{ key }}:</strong> {{ value }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Content Analysis</h2>
+    <ul>
+        <li><strong>Total Words:</strong> {{ content_analysis.word_count }}</li>
+        <li><strong>Unique Words:</strong> {{ content_analysis.unique_word_count }}</li>
+        <li><strong>Total Images:</strong> {{ content_analysis.image_count }}</li>
+        <li><strong>Total Links:</strong> {{ content_analysis.link_count }}</li>
+    </ul>
+
+    <h2>Unique Words and Their Counts</h2>
+    <ul>
+        {% for word, count in word_counts.items() %}
+            <li><strong>{{ word }}:</strong> {{ count }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="/">Analyze Another URL</a>
+</body>
+</html>
